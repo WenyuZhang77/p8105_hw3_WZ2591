@@ -60,7 +60,7 @@ instacart[1,] %>% knitr::kable()
 ### How many aisles are there, and which aisles are the most items ordered from?
 
 There are `r length(unique(pull(instacart, aisle)))` aisles and the most items are ordered form `r names(sort(table(pull(instacart, aisle)),decreasing=TRUE))[1]`
-```{r}
+```{r, results='hide'}
 length(unique(pull(instacart, aisle)))
 names(sort(table(pull(instacart, aisle)),decreasing=TRUE))[1]
 ```
