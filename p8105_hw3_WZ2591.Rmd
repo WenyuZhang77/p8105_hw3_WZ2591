@@ -1,0 +1,105 @@
+---
+title: "p8105_hw2_WZ2591"
+author: "Wenyu Zhang"
+date: "10/17/2021"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Problem 1
+## load the data from the p8105.datasets
+
+```{r}
+library(p8105.datasets)
+data("instacart")
+```
+
+## Do some exploration of this dataset
+
+Size of the data: The dataset contains `r nrow(instacart)` observations and `r ncol(instacart)` variables.
+```{r, include=FALSE}
+nrow(instacart)
+ncol(instacart)
+skimr::skim(instacart)
+```
+
+Structure of the data: The data is about the information of online grocery orders from Instacart users. Each row represent one order of one product from Instacart users. The dataset have 15 variables: eval_set, product_name, aisle, department, order_id, product_id, add_to_cart_order, reordered, user_id, order_number, order_dow, order_hour_of_day, days_since_prior_order, aisle_id and department_id.
+
+## Describing some key variables, and giving illstrative examples of observations
+
+### The mean of variable `reordered` is `r mean(pull(instacart, reordered))`, and it means about 60% products are reordered.
+```{r}
+mean(pull(instacart, reordered))
+```
+
+### The variable `order_hour_of_day` menas the time that the order was placed, and it shows most orders are placed at `r names(sort(table(pull(instacart, order_hour_of_day)),decreasing=TRUE))[1]`, which is at 2pm
+```{r}
+names(sort(table(pull(instacart, order_hour_of_day)),decreasing=TRUE))[1]
+```
+
+### The mean value of `days_since_prior_order` is `r mean(pull(instacart, days_since_prior_order))`, which means people usually orders again after 17 days. And most of people order after `r names(sort(table(pull(instacart, days_since_prior_order)),decreasing=TRUE))[1]` days from the prior order
+```{r}
+mean(pull(instacart, days_since_prior_order))
+names(sort(table(pull(instacart, days_since_prior_order)),decreasing=TRUE))[1]
+```
+
+### This means `r names(sort(table(pull(instacart, product_name)),decreasing=TRUE))[1]` is the product that users order most.
+```{r}
+names(sort(table(pull(instacart, product_name)),decreasing=TRUE))[1]
+```
+
+### This is the data of the first row. It tells us that a users placed a order of Bulgarian Yogurt from yogurt aisle, which is 120 aisle from the department of dairy eggs. The order was placed in 10 am Thursday, and it is 9 days since prior order. 
+```{r}
+instacart[1,] %>% knitr::kable()
+```
+
+## Answer the following (commenting on the results of each):
+### How many aisles are there, and which aisles are the most items ordered from?
+
+There are `r length(unique(pull(instacart, aisle)))` aisles and the most items are ordered form `r names(sort(table(pull(instacart, aisle)),decreasing=TRUE))[1]`
+```{r}
+length(unique(pull(instacart, aisle)))
+names(sort(table(pull(instacart, aisle)),decreasing=TRUE))[1]
+```
+
+### Make a plot that shows the number of items ordered in each aisle
+```{r}
+aisle = 
+  instacart %>% 
+  count(aisle, name = 'number_of_items') %>%
+  filter(number_of_items > 10000) %>% 
+  ggplot(aes(reorder(aisle, number_of_items), x = number_of_items)) + 
+    geom_point() +
+    xlab('Number of each item ordered') +
+    ylab('Aisle name') +
+    labs(title = ' the number of items ordered in each aisle with more than 10000 items ordered')
+  
+aisle
+```
+
+### Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. 
+```{r}
+Three_pop_items = 
+  instacart %>%
+  group_by(aisle) %>% 
+  filter(aisle %in% c('baking ingredients', 'dog food care', 'packaged vegetables fruits')
+  ) %>%
+  count(product_name, name = 'number_of_ordered_time') %>%
+  top_n(n = 3, wt = number_of_ordered_time) %>% 
+  arrange(desc(number_of_ordered_time)) %>%
+  rename(
+    'aisle name' = aisle, 
+    'three most popular items in this aisle' = product_name, 
+    'number of ordered time' = number_of_ordered_time
+    ) %>% 
+  knitr::kable()
+  
+Three_pop_items
+```
+
+
+
+
