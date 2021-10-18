@@ -51,9 +51,9 @@ names(sort(table(pull(instacart, days_since_prior_order)),decreasing=TRUE))[1]
 names(sort(table(pull(instacart, product_name)),decreasing=TRUE))[1]
 ```
 
-### This is the data of the first row. It tells us that a users placed a order of Bulgarian Yogurt from yogurt aisle, which is 120 aisle from the department of dairy eggs. The order was placed in 10 am Thursday, and it is 9 days since prior order. 
+### This is the data of the second row. It tells us that a users placed a order of Organic 4% Milk Fat Whole Milk Cottage Cheese from other creams cheeses aisle, which is 108 aisle from the department of dairy eggs. The order was placed in 10 am Thursday, and it is 9 days since prior order. 
 ```{r}
-instacart[1,] %>% knitr::kable()
+instacart[2,] %>% knitr::kable()
 ```
 
 ## Answer the following (commenting on the results of each):
@@ -72,11 +72,14 @@ aisle =
   count(aisle, name = 'number_of_items') %>%
   filter(number_of_items > 10000) %>% 
   ggplot(aes(reorder(aisle, number_of_items), x = number_of_items)) + 
-    geom_point() +
-    xlab('Number of each item ordered') +
-    ylab('Aisle name') +
-    labs(title = ' the number of items ordered in each aisle with more than 10000 items ordered')
-  
+  geom_point() + 
+  labs(
+    title = "the number of items ordered in each aisle with more than 10000 items ordered",
+    x = "Number of items ordered in each aisle",
+    y = "Aisle name",
+    caption = "the data was loaded from the p8105.datasets"
+  )
+
 aisle
 ```
 
@@ -84,9 +87,8 @@ aisle
 ```{r}
 Three_pop_items = 
   instacart %>%
-  group_by(aisle) %>% 
-  filter(aisle %in% c('baking ingredients', 'dog food care', 'packaged vegetables fruits')
-  ) %>%
+  group_by(aisle) %>%
+  filter(aisle == "baking ingredients" | aisle == "dog food care" | aisle == "packaged vegetables fruits") %>% 
   count(product_name, name = 'number_of_ordered_time') %>%
   top_n(n = 3, wt = number_of_ordered_time) %>% 
   arrange(desc(number_of_ordered_time)) %>%
@@ -96,7 +98,7 @@ Three_pop_items =
     'number of ordered time' = number_of_ordered_time
     ) %>% 
   knitr::kable()
-  
+
 Three_pop_items
 ```
 
