@@ -10,7 +10,8 @@ library(tidyverse)
 ```
 
 # Problem 1
-## load the data from the p8105.datasets
+
+load the data from the p8105.datasets
 
 ```{r}
 library(p8105.datasets)
@@ -30,42 +31,50 @@ Structure of the data: The data is about the information of online grocery order
 
 ## Describing some key variables, and giving illstrative examples of observations
 
-### The mean of variable `reordered` is `r mean(pull(instacart, reordered))`, and it means about 60% products are reordered.
+### 1. The mean of variable `reordered` is `r mean(pull(instacart, reordered))`, and it means about 60% products are reordered.
+
 ```{r}
 mean(pull(instacart, reordered))
 ```
 
-### The variable `order_hour_of_day` menas the time that the order was placed, and it shows most orders are placed at `r names(sort(table(pull(instacart, order_hour_of_day)),decreasing=TRUE))[1]`, which is at 2pm
+### 2. The variable `order_hour_of_day` menas the time that the order was placed, and it shows most orders are placed at `r names(sort(table(pull(instacart, order_hour_of_day)),decreasing=TRUE))[1]`, which is at 2pm
+
 ```{r}
 names(sort(table(pull(instacart, order_hour_of_day)),decreasing=TRUE))[1]
 ```
 
-### The mean value of `days_since_prior_order` is `r mean(pull(instacart, days_since_prior_order))`, which means people usually orders again after 17 days. And most of people order after `r names(sort(table(pull(instacart, days_since_prior_order)),decreasing=TRUE))[1]` days from the prior order
+### 3. The mean value of `days_since_prior_order` is `r mean(pull(instacart, days_since_prior_order))`, which means people usually orders again after 17 days. And most of people order after `r names(sort(table(pull(instacart, days_since_prior_order)),decreasing=TRUE))[1]` days from the prior order
+
 ```{r}
 mean(pull(instacart, days_since_prior_order))
 names(sort(table(pull(instacart, days_since_prior_order)),decreasing=TRUE))[1]
 ```
 
-### This means `r names(sort(table(pull(instacart, product_name)),decreasing=TRUE))[1]` is the product that users order most.
+### 4. This means `r names(sort(table(pull(instacart, product_name)),decreasing=TRUE))[1]` is the product that users order most.
+
 ```{r}
 names(sort(table(pull(instacart, product_name)),decreasing=TRUE))[1]
 ```
 
 ### This is the data of the second row. It tells us that a users placed a order of Organic 4% Milk Fat Whole Milk Cottage Cheese from other creams cheeses aisle, which is 108 aisle from the department of dairy eggs. The order was placed in 10 am Thursday, and it is 9 days since prior order. 
+
 ```{r}
 instacart[2,] %>% knitr::kable()
 ```
 
 ## Answer the following (commenting on the results of each):
+
 ### How many aisles are there, and which aisles are the most items ordered from?
 
 There are `r length(unique(pull(instacart, aisle)))` aisles and the most items are ordered form `r names(sort(table(pull(instacart, aisle)),decreasing=TRUE))[1]`
+
 ```{r, results='hide'}
 length(unique(pull(instacart, aisle)))
 names(sort(table(pull(instacart, aisle)),decreasing=TRUE))[1]
 ```
 
 ### Make a plot that shows the number of items ordered in each aisle
+
 ```{r}
 aisle = 
   instacart %>% 
@@ -84,6 +93,7 @@ aisle
 ```
 
 ### Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. 
+
 ```{r}
 Three_pop_items = 
   instacart %>%
@@ -103,6 +113,7 @@ Three_pop_items
 ```
 
 ### Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+
 ```{r}
 mean_hour_apples_icecream = 
   instacart %>%
@@ -123,6 +134,95 @@ mean_hour_apples_icecream =
   knitr::kable()
 
 mean_hour_apples_icecream
+```
+
+# Problem 2
+
+load the data from the p8105.datasets
+
+```{r}
+library(p8105.datasets)
+data("brfss_smart2010")
+```
+
+## Clean the data
+
+```{r}
+brfss_clean =
+  brfss_smart2010 %>%
+  janitor::clean_names() %>%
+  select(-locationabbr) %>% 
+  separate(locationdesc, into = c("state", "county"), sep = " - ") %>% 
+  filter(topic == 'Overall Health',
+         response %in% c('Poor', 'Fair', 'Good', 'Very good', 'Excellent')) %>%
+  mutate(response = factor(response, levels = c('Poor', 'Fair', 'Good', 'Very good', 'Excellent'), ordered = TRUE)) %>% 
+  arrange(response)
+
+
+brfss_clean
+```
+
+## Answer the following questions:
+
+### 1. In 2002, which states were observed at 7 or more locations? What about in 2010?
+
+```{r, message=FALSE}
+locations_2002_2010 = 
+  brfss_clean %>% 
+  filter(year == 2002 | year == 2010) %>% 
+  group_by(state, year) %>% 
+  summarise(observed = n_distinct(county)) %>% 
+  filter(observed >= 7) %>%
+  pivot_wider(
+    names_from = year,
+    values_from = observed) 
+
+locations_2002_2010
+```
+
+## 2. Construct a dataset that is limited to Excellent responses, and contains, year, state, and a variable that averages the data_value across locations within a state. Make a “spaghetti” plot of this average value over time within a state
+
+```{r}
+excellent_response = 
+  brfss_clean %>% 
+  filter(response == "Excellent") %>%
+  select(year, state, data_value) %>% 
+  group_by(year, state) %>% 
+  summarise(average_data_value = mean(data_value))
+
+excellent_response
+```
+
+```{r}
+excellent_response_plot = 
+  excellent_response %>% 
+  ggplot(aes(x = year, y = average_data_value, color = state)) +
+  geom_line() +
+  labs(
+    title = "the average value over time within a state",
+    caption = "Data from brfss_smart2010")
+
+excellent_response_plot
+```
+
+## 3. Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State.
+
+```{r}
+distribution_plot = 
+  brfss_clean %>% 
+  filter(year == 2006 | year == 2010,
+         state == 'NY') %>%
+  select(year, state, county, response, data_value) %>%
+  ggplot(aes(x = response,y = data_value, fill = county)) +
+  geom_col(position = "dodge",colour = "black") +
+  facet_grid(.~year) +
+  labs(
+    title = "distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State in years 2006, and 2010",
+    x = "response",
+    y = "data value",
+    caption = "Data from brfss_smart2010")
+
+distribution_plot
 ```
 
 
