@@ -27,36 +27,50 @@ ncol(instacart)
 skimr::skim(instacart)
 ```
 
-Structure of the data: The data is about the information of online grocery orders from Instacart users. Each row represent one order of one product from Instacart users. The dataset have 15 variables: eval_set, product_name, aisle, department, order_id, product_id, add_to_cart_order, reordered, user_id, order_number, order_dow, order_hour_of_day, days_since_prior_order, aisle_id and department_id.
+Structure of the data: The data is about the information of online grocery orders from Instacart users. Each row represent one order of one product from Instacart users. The dataset have 15 variables: `r names(instacart)` and 4 character variables: eval_set, product_name, aisle and department.
 
 ## Describing some key variables, and giving illstrative examples of observations
 
-### 1. The mean of variable `reordered` is `r mean(pull(instacart, reordered))`, and it means about 60% products are reordered.
+**1.**
+The variable `reordered` means the product is been reordered or not. 
 
-```{r}
+The mean of variable `reordered` is `r mean(pull(instacart, reordered))`, and it means about 60% products are reordered.
+
+```{r, include=FALSE}
 mean(pull(instacart, reordered))
 ```
 
-### 2. The variable `order_hour_of_day` menas the time that the order was placed, and it shows most orders are placed at `r names(sort(table(pull(instacart, order_hour_of_day)),decreasing=TRUE))[1]`, which is at 2pm
+**2.** 
+The variable `order_hour_of_day` records the time that the order was placed.
 
-```{r}
-names(sort(table(pull(instacart, order_hour_of_day)),decreasing=TRUE))[1]
+It shows most orders are placed at `r names(sort(table(pull(instacart, order_hour_of_day)),decreasing=TRUE))[1]`, which is at 2pm
+
+```{r, include=FALSE}
+names(sort(table(pull(instacart, order_hour_of_day)),decreasing = TRUE))[1]
 ```
 
-### 3. The mean value of `days_since_prior_order` is `r mean(pull(instacart, days_since_prior_order))`, which means people usually orders again after 17 days. And most of people order after `r names(sort(table(pull(instacart, days_since_prior_order)),decreasing=TRUE))[1]` days from the prior order
+**3.** 
+The variable `days_since_prior_order` represents the time since the last order.
 
-```{r}
+The mean value of `days_since_prior_order` is `r mean(pull(instacart, days_since_prior_order))`, which means people usually orders again after 17 days. And most of people order after `r names(sort(table(pull(instacart, days_since_prior_order)),decreasing=TRUE))[1]` days from the prior order
+
+```{r, include=FALSE}
 mean(pull(instacart, days_since_prior_order))
-names(sort(table(pull(instacart, days_since_prior_order)),decreasing=TRUE))[1]
+names(sort(table(pull(instacart, days_since_prior_order)),decreasing = TRUE))[1]
 ```
 
-### 4. This means `r names(sort(table(pull(instacart, product_name)),decreasing=TRUE))[1]` is the product that users order most.
+**4.** 
+The variable `product_name` reprensets the name of product.
 
-```{r}
-names(sort(table(pull(instacart, product_name)),decreasing=TRUE))[1]
+`r names(sort(table(pull(instacart, product_name)),decreasing=TRUE))[1]` is the product that users order most.
+
+```{r, include=FALSE}
+names(sort(table(pull(instacart, product_name)),decreasing = TRUE))[1]
 ```
 
-### This is the data of the second row. It tells us that a users placed a order of Organic 4% Milk Fat Whole Milk Cottage Cheese from other creams cheeses aisle, which is 108 aisle from the department of dairy eggs. The order was placed in 10 am Thursday, and it is 9 days since prior order. 
+**illstrative examples of observations** 
+
+This is the data of the second row. It tells us that a users placed a order of Organic 4% Milk Fat Whole Milk Cottage Cheese from other creams cheeses aisle, which is 108 aisle from the department of dairy eggs. The order was placed in 10 am Thursday, and it is 9 days since prior order. 
 
 ```{r}
 instacart[2,] %>% knitr::kable()
@@ -70,7 +84,7 @@ There are `r length(unique(pull(instacart, aisle)))` aisles and the most items a
 
 ```{r, results='hide'}
 length(unique(pull(instacart, aisle)))
-names(sort(table(pull(instacart, aisle)),decreasing=TRUE))[1]
+names(sort(table(pull(instacart, aisle)),decreasing = TRUE))[1]
 ```
 
 ### Make a plot that shows the number of items ordered in each aisle
@@ -98,7 +112,8 @@ aisle
 Three_pop_items = 
   instacart %>%
   group_by(aisle) %>%
-  filter(aisle == "baking ingredients" | aisle == "dog food care" | aisle == "packaged vegetables fruits") %>% 
+  filter(aisle == "baking ingredients" | aisle == "dog food care" | aisle == "packaged vegetables fruits"
+         ) %>%
   count(product_name, name = 'number_of_ordered_time') %>%
   top_n(n = 3, wt = number_of_ordered_time) %>% 
   arrange(desc(number_of_ordered_time)) %>%
@@ -107,7 +122,7 @@ Three_pop_items =
     'three most popular items in this aisle' = product_name, 
     'number of ordered time' = number_of_ordered_time
     ) %>% 
-  knitr::kable()
+  knitr::kable(caption = "three most popular items in each of the aisles baking ingredients, dog food care, and packaged vegetables fruits")
 
 Three_pop_items
 ```
@@ -131,7 +146,7 @@ mean_hour_apples_icecream =
          `Thursday` = `4`, 
          `Friday` = `5`, 
          `Saturday` = `6`) %>% 
-  knitr::kable()
+  knitr::kable(caption = "the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week")
 
 mean_hour_apples_icecream
 ```
@@ -208,24 +223,130 @@ excellent_response_plot
 ## 3. Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State.
 
 ```{r}
-distribution_plot = 
+distribution = 
   brfss_clean %>% 
   filter(year == 2006 | year == 2010,
          state == 'NY') %>%
-  select(year, state, county, response, data_value) %>%
-  ggplot(aes(x = response,y = data_value, fill = county)) +
-  geom_col(position = "dodge",colour = "black") +
-  facet_grid(.~year) +
-  labs(
-    title = "distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State in years 2006, and 2010",
-    x = "response",
-    y = "data value",
-    caption = "Data from brfss_smart2010")
+  select(year, state, county, response, data_value) 
+```
+
+```{r}
+distribution_plot = 
+  distribution %>%
+  ggplot(aes(x = data_value, fill = response)) +
+  geom_density() +
+  facet_grid(. ~ year) +
+  labs(title = "distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State in years 2006, and 2010",
+       x = "data value of responses",
+       y = "Density of data value") +
+  scale_fill_manual(values = alpha(terrain.colors(5), 0.5))
 
 distribution_plot
 ```
 
+# Problem 3
 
+## Load, tidy, and otherwise wrangle the data.
 
+```{r}
+accel_data = 
+  read_csv("data/accel_data.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    weekday_or_weekend = case_when(
+      day == "Monday" ~ "weekday",
+      day == "Tuesday" ~ "weekday",
+      day == "Wednesday" ~ "weekday",
+      day == "Thursday" ~ "weekday",
+      day == "Friday" ~ "weekday",
+      day == "Saturday" ~ "weekend",
+      day == "Sunday" ~ "weekend")
+  ) %>% 
+  mutate(day = factor(day, levels = 
+                        c("Monday", 
+                          "Tuesday", 
+                          "Wednesday", 
+                          "Thursday", 
+                          "Friday", 
+                          "Saturday",  
+                          "Sunday"))) %>% 
+  select(day_id, day, weekday_or_weekend, week, everything()) %>% 
+  pivot_longer(activity_1:activity_1440,
+    names_to = "activity_minutes",
+    names_prefix = "activity_",
+    values_to = "activity_counts") %>% 
+  mutate(
+    week = as.factor(week), 
+    weekday_or_weekend = as.factor(weekday_or_weekend),
+    activity_minutes = as.numeric(activity_minutes)
+  ) %>% 
+  arrange(week)
 
+accel_data    
+```
+
+## Describe the resulting dataset
+
+```{r, include=FALSE}
+nrow(accel_data)
+ncol(accel_data)
+skimr::skim(accel_data)
+```
+
+The dataset contains `r nrow(accel_data)` observations and `r ncol(accel_data)` variables.The variables are `r names(accel_data)`
+
+`week`: to see which week of accelerometer data was collected on a 63-year-old male with BMI of 25
+
+`day_id`: day identifier
+
+ `day`: to see which day that the data collected in the week
+
+`weekday_weekend`: to see the day is whether weekday or weekend
+
+`activity_minutes`: count for each minute of a 24-hour day starting at midnight
+
+`acitvity_counts`: accelerometer value in each activity_minutes
+
+## Traditional analyses of accelerometer data focus on the total activity over the day.
+
+```{r}
+accel_data_analysis =
+  accel_data %>% 
+  group_by(week, day) %>% 
+  summarise(total_activity = sum(activity_counts)) %>% 
+   pivot_wider(
+  names_from = "day", 
+  values_from = "total_activity") %>%
+  knitr::kable(caption = "A total activity counts for each day in 5 week")
+
+accel_data_analysis
+```
+
+**Are any trends apparent?**
+Normally, the accelerometer value in weekend is lower than the value in weekday. In saturdays of week 4 and week 5, the accelerometer value is only 1440, this is probability because patients forget to wear the accelerometer.
+
+## Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week.
+
+```{r}
+activity_time_plot = 
+  accel_data %>% 
+  ggplot(aes(
+         x = activity_minutes / 60,
+         y = activity_counts,
+         color = day)) +
+  scale_x_continuous(
+    breaks = c(0, 3, 6, 9, 12, 15, 18, 21, 24), 
+    labels = c("00:00 ", "03:00 ", "06:00 ", "09:00 ","12:00 ", "15:00 ","18:00", "21:00 ","24:00"), 
+    limits = c(0, 24)) +
+  geom_line(aes(color = day)) +
+  labs(title = "the 24-hour activity time courses for each day", 
+       x = "24-hour activity time", 
+       y = "activity value",
+       caption = "Data from accel_data.csv") +
+  scale_color_hue(name = "Day of week")
+
+activity_time_plot
+```
+
+We can see from the plot, the peak of activity for this male is around 12:00 and 19:30 - 21:00.
 
