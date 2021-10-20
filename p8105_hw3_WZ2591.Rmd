@@ -32,16 +32,16 @@ Structure of the data: The data is about the information of online grocery order
 ## Describing some key variables, and giving illstrative examples of observations
 
 **1.**
-The variable `reordered` means the product is been reordered or not. 
+`reordered` means the product is been reordered or not. 
 
-The mean of variable `reordered` is `r mean(pull(instacart, reordered))`, and it means about 60% products are reordered.
+The mean value of `reordered` is `r mean(pull(instacart, reordered))`, and it means about 60% products are reordered.
 
 ```{r, include=FALSE}
 mean(pull(instacart, reordered))
 ```
 
 **2.** 
-The variable `order_hour_of_day` records the time that the order was placed.
+`order_hour_of_day`: records the time that the order was placed.
 
 It shows most orders are placed at `r names(sort(table(pull(instacart, order_hour_of_day)),decreasing=TRUE))[1]`, which is at 2pm
 
@@ -50,17 +50,16 @@ names(sort(table(pull(instacart, order_hour_of_day)),decreasing = TRUE))[1]
 ```
 
 **3.** 
-The variable `days_since_prior_order` represents the time since the last order.
+`days_since_prior_order`: represents the time since the last order.
 
-The mean value of `days_since_prior_order` is `r mean(pull(instacart, days_since_prior_order))`, which means people usually orders again after 17 days. And most of people order after `r names(sort(table(pull(instacart, days_since_prior_order)),decreasing=TRUE))[1]` days from the prior order
+The mean value of `days_since_prior_order` is `r mean(pull(instacart, days_since_prior_order))`, which means people usually orders again after 17 days.
 
 ```{r, include=FALSE}
 mean(pull(instacart, days_since_prior_order))
-names(sort(table(pull(instacart, days_since_prior_order)),decreasing = TRUE))[1]
 ```
 
 **4.** 
-The variable `product_name` reprensets the name of product.
+`product_name`: reprensets the name of product.
 
 `r names(sort(table(pull(instacart, product_name)),decreasing=TRUE))[1]` is the product that users order most.
 
@@ -97,7 +96,8 @@ aisle =
   ggplot(aes(reorder(aisle, number_of_items), x = number_of_items)) + 
   geom_point() + 
   labs(
-    title = "the number of items ordered in each aisle with more than 10000 items ordered",
+    title = "the number of items ordered 
+    in each aisle with more than 10000 items ordered",
     x = "Number of items ordered in each aisle",
     y = "Aisle name",
     caption = "the data was loaded from the p8105.datasets"
@@ -122,7 +122,9 @@ Three_pop_items =
     'three most popular items in this aisle' = product_name, 
     'number of ordered time' = number_of_ordered_time
     ) %>% 
-  knitr::kable(caption = "three most popular items in each of the aisles baking ingredients, dog food care, and packaged vegetables fruits")
+  knitr::kable(caption = "three most popular items 
+               in each of the aisles baking ingredients, 
+               dog food care, and packaged vegetables fruits")
 
 Three_pop_items
 ```
@@ -146,7 +148,9 @@ mean_hour_apples_icecream =
          `Thursday` = `4`, 
          `Friday` = `5`, 
          `Saturday` = `6`) %>% 
-  knitr::kable(caption = "the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week")
+  knitr::kable(caption = "the mean hour of the day 
+               at which Pink Lady Apples 
+               and Coffee Ice Cream are ordered on each day of the week")
 
 mean_hour_apples_icecream
 ```
@@ -169,8 +173,17 @@ brfss_clean =
   select(-locationabbr) %>% 
   separate(locationdesc, into = c("state", "county"), sep = " - ") %>% 
   filter(topic == 'Overall Health',
-         response %in% c('Poor', 'Fair', 'Good', 'Very good', 'Excellent')) %>%
-  mutate(response = factor(response, levels = c('Poor', 'Fair', 'Good', 'Very good', 'Excellent'), ordered = TRUE)) %>% 
+         response %in% c('Poor', 
+                         'Fair', 
+                         'Good', 
+                         'Very good', 
+                         'Excellent')) %>%
+  mutate(response = factor(response, levels = c('Poor', 
+                                                'Fair', 
+                                                'Good', 
+                                                'Very good', 
+                                                'Excellent'), 
+                           ordered = TRUE)) %>% 
   arrange(response)
 
 
@@ -197,7 +210,7 @@ locations_2002_2010
 
 ## 2. Construct a dataset that is limited to Excellent responses, and contains, year, state, and a variable that averages the data_value across locations within a state. Make a “spaghetti” plot of this average value over time within a state
 
-```{r}
+```{r, message=FALSE}
 excellent_response = 
   brfss_clean %>% 
   filter(response == "Excellent") %>%
@@ -208,7 +221,7 @@ excellent_response =
 excellent_response
 ```
 
-```{r}
+```{r, message=FALSE}
 excellent_response_plot = 
   excellent_response %>% 
   ggplot(aes(x = year, y = average_data_value, color = state)) +
@@ -236,7 +249,9 @@ distribution_plot =
   ggplot(aes(x = data_value, fill = response)) +
   geom_density() +
   facet_grid(. ~ year) +
-  labs(title = "distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State in years 2006, and 2010",
+  labs(title = "distribution of data_value 
+       for responses (“Poor” to “Excellent”) among locations 
+       in NY State in years 2006, and 2010",
        x = "data value of responses",
        y = "Density of data value") +
   scale_fill_manual(values = alpha(terrain.colors(5), 0.5))
@@ -336,7 +351,15 @@ activity_time_plot =
          color = day)) +
   scale_x_continuous(
     breaks = c(0, 3, 6, 9, 12, 15, 18, 21, 24), 
-    labels = c("00:00 ", "03:00 ", "06:00 ", "09:00 ","12:00 ", "15:00 ","18:00", "21:00 ","24:00"), 
+    labels = c("00:00", 
+               "03:00", 
+               "06:00", 
+               "09:00", 
+               "12:00", 
+               "15:00", 
+               "18:00", 
+               "21:00", 
+               "24:00"), 
     limits = c(0, 24)) +
   geom_line(aes(color = day)) +
   labs(title = "the 24-hour activity time courses for each day", 
