@@ -1,5 +1,5 @@
 ---
-title: "p8105_hw2_WZ2591"
+title: "p8105_hw3_WZ2591"
 author: "Wenyu Zhang"
 date: "10/17/2021"
 output: github_document
@@ -32,7 +32,7 @@ Structure of the data: The data is about the information of online grocery order
 ## Describing some key variables, and giving illstrative examples of observations
 
 **1.**
-`reordered` means the product is been reordered or not. 
+`reordered` record the product is been reordered or not. 
 
 The mean value of `reordered` is `r mean(pull(instacart, reordered))`, and it means about 60% products are reordered.
 
@@ -112,8 +112,7 @@ aisle
 Three_pop_items = 
   instacart %>%
   group_by(aisle) %>%
-  filter(aisle == "baking ingredients" | aisle == "dog food care" | aisle == "packaged vegetables fruits"
-         ) %>%
+  filter(aisle == "baking ingredients" | aisle == "dog food care" | aisle == "packaged vegetables fruits") %>%
   count(product_name, name = 'number_of_ordered_time') %>%
   top_n(n = 3, wt = number_of_ordered_time) %>% 
   arrange(desc(number_of_ordered_time)) %>%
@@ -131,7 +130,7 @@ Three_pop_items
 
 ### Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
 
-```{r}
+```{r, message=FALSE}
 mean_hour_apples_icecream = 
   instacart %>%
   filter(product_name == "Pink Lady Apples" | product_name == "Coffee Ice Cream") %>% 
@@ -166,18 +165,22 @@ data("brfss_smart2010")
 
 ## Clean the data
 
+format the data to use appropriate variable names;
+
+focus on the “Overall Health” topic
+
+include only responses from “Excellent” to “Poor”
+
+organize responses as a factor taking levels ordered from “Poor” to “Excellent”
 ```{r}
 brfss_clean =
   brfss_smart2010 %>%
   janitor::clean_names() %>%
   select(-locationabbr) %>% 
   separate(locationdesc, into = c("state", "county"), sep = " - ") %>% 
-  filter(topic == 'Overall Health',
-         response %in% c('Poor', 
-                         'Fair', 
-                         'Good', 
-                         'Very good', 
-                         'Excellent')) %>%
+  filter(topic == 'Overall Health') %>%
+  filter(response == "Excellent" | response == "Very good" | response == "Good" | response == "Fair" | response == "Poor"
+         ) %>% 
   mutate(response = factor(response, levels = c('Poor', 
                                                 'Fair', 
                                                 'Good', 
@@ -185,6 +188,7 @@ brfss_clean =
                                                 'Excellent'), 
                            ordered = TRUE)) %>% 
   arrange(response)
+
 
 
 brfss_clean
@@ -202,8 +206,9 @@ locations_2002_2010 =
   summarise(observed = n_distinct(county)) %>% 
   filter(observed >= 7) %>%
   pivot_wider(
-    names_from = year,
-    values_from = observed) 
+    names_from = state,
+    values_from = observed) %>% 
+  knitr::kable()
 
 locations_2002_2010
 ```
@@ -249,11 +254,9 @@ distribution_plot =
   ggplot(aes(x = data_value, fill = response)) +
   geom_density() +
   facet_grid(. ~ year) +
-  labs(title = "distribution of data_value 
-       for responses (“Poor” to “Excellent”) among locations 
-       in NY State in years 2006, and 2010",
+  labs(title = "distribution of data_value for responses among locations in NY State in years 2006, and 2010",
        x = "data value of responses",
-       y = "Density of data value") +
+       y = "density of data value") +
   scale_fill_manual(values = alpha(terrain.colors(5), 0.5))
 
 distribution_plot
@@ -314,7 +317,7 @@ The dataset contains `r nrow(accel_data)` observations and `r ncol(accel_data)` 
 
 `day_id`: day identifier
 
- `day`: to see which day that the data collected in the week
+`day`: to see which day that the data collected in the week
 
 `weekday_weekend`: to see the day is whether weekday or weekend
 
@@ -349,6 +352,11 @@ activity_time_plot =
          x = activity_minutes / 60,
          y = activity_counts,
          color = day)) +
+  geom_line(aes(color = day)) +
+  labs(title = "the 24-hour activity time courses for each day", 
+       x = "24-hour activity time", 
+       y = "activity value",
+       caption = "Data from accel_data.csv") +
   scale_x_continuous(
     breaks = c(0, 3, 6, 9, 12, 15, 18, 21, 24), 
     labels = c("00:00", 
@@ -361,11 +369,6 @@ activity_time_plot =
                "21:00", 
                "24:00"), 
     limits = c(0, 24)) +
-  geom_line(aes(color = day)) +
-  labs(title = "the 24-hour activity time courses for each day", 
-       x = "24-hour activity time", 
-       y = "activity value",
-       caption = "Data from accel_data.csv") +
   scale_color_hue(name = "Day of week")
 
 activity_time_plot
